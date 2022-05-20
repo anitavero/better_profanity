@@ -13,7 +13,7 @@ from .varying_string import VaryingString
 
 
 class Profanity:
-    def __init__(self, words=None):
+    def __init__(self, words=None, mapping=None):
         """
         Args:
             words (Iterable/str): Collection of words or file path for a list of
@@ -30,17 +30,20 @@ class Profanity:
         ):
             raise TypeError("words must be of type str, list, or None")
         self.CENSOR_WORDSET = []
-        self.CHARS_MAPPING = {
-            "a": ("a", "@", "*", "4"),
-            "i": ("i", "*", "l", "1"),
-            "o": ("o", "*", "0", "@"),
-            "u": ("u", "*", "v"),
-            "v": ("v", "*", "u"),
-            "l": ("l", "1"),
-            "e": ("e", "*", "3"),
-            "s": ("s", "$", "5"),
-            "t": ("t", "7"),
-        }
+        if mapping:
+            self.CHARS_MAPPING = mapping
+        else:
+            self.CHARS_MAPPING = {
+                "a": ("a", "@", "*", "4"),
+                "i": ("i", "*", "l", "1"),
+                "o": ("o", "*", "0", "@"),
+                "u": ("u", "*", "v"),
+                "v": ("v", "*", "u"),
+                "l": ("l", "1"),
+                "e": ("e", "*", "3"),
+                "s": ("s", "$", "5"),
+                "t": ("t", "7"),
+            }
         self.MAX_NUMBER_COMBINATIONS = 1
         self.ALLOWED_CHARACTERS = ALLOWED_CHARACTERS
         self._default_wordlist_filename = get_complete_path_of_file(
@@ -52,6 +55,15 @@ class Profanity:
             self.load_censor_words(custom_words=words)
 
     ## PUBLIC ##
+
+    def convert_to_original(self, word):
+        """Convert a leet speak word to its original form. 
+        Return the word if it isn't in the keyword list with substitutions.
+        """
+        for varying_string in self.CENSOR_WORDSET:
+            if word == varying_string:
+                return varying_string._original
+        return word
 
     def censor(self, text, censor_char="*"):
         """Replace the swear words in the text with `censor_char`."""
